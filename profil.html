@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Profil Peserta</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #333;
+        }
+
+        .header {
+            background: #0b5d3b;
+            color: white;
+            padding: 25px 20px;
+            border-radius: 0 0 25px 25px;
+        }
+
+        .back {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            opacity: 0.9;
+        }
+
+        .content {
+            max-width: 430px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .title {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+
+        .family {
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .family:last-child {
+            border-bottom: none;
+        }
+
+        .family-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .family-info {
+            color: #777;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+
+        <a href="dashboard.html" class="back">
+            ← Kembali
+        </a>
+
+        <h1>Profil 👤</h1>
+        <p>Data peserta dan keluarga</p>
+
+    </div>
+
+    <div class="content">
+
+        <div class="card">
+
+            <div class="title">
+                NAMA PESERTA
+            </div>
+
+            <div class="value" id="namaPeserta">
+                -
+            </div>
+
+            <div class="title">
+                NIK
+            </div>
+
+            <div class="value" id="nikPeserta">
+                -
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                ANGGOTA KELUARGA
+            </div>
+
+            <div id="daftarKeluarga">
+            </div>
+
+        </div>
+
+    </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+async function loadProfil() {
+
+    const nikLogin = localStorage.getItem("nikLogin");
+
+    if (!nikLogin) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("ambil_peserta", {
+            p_nik: nikLogin
+        })
+        .maybeSingle();
+
+    if (error) {
+        console.log(error);
+        alert("Gagal mengambil data profil.");
+        return;
+    }
+
+    if (!data) {
+        localStorage.removeItem("nikLogin");
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("namaPeserta").textContent =
+        data.nama;
+
+    document.getElementById("nikPeserta").textContent =
+        "NIK: " + data.nik;
+
+    const daftar = document.getElementById("daftarKeluarga");
+
+    daftar.innerHTML = "";
+
+    data.keluarga.forEach(function(anggota) {
+
+        const item = document.createElement("div");
+        item.className = "family";
+
+        item.innerHTML = `
+            <div class="family-name">
+                ${anggota.nama}
+            </div>
+
+            <div class="family-info">
+                ${anggota.hubungan}
+            </div>
+
+            <div class="family-info">
+                👕 Ukuran Baju: ${anggota.ukuranBaju}
+            </div>
+
+            <div class="family-info">
+                💺 Kursi: ${anggota.kursi}
+            </div>
+        `;
+
+        daftar.appendChild(item);
+    });
+}
+
+loadProfil();
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Data Baju</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: #f7f9f8;
+        }
+
+        .header {
+            background: #174d35;
+            color: white;
+            padding: 30px 22px;
+            border-radius: 0 0 28px 28px;
+        }
+
+        .back {
+            font-size: 25px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-size: 26px;
+        }
+
+        .header p {
+            margin-top: 7px;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .content {
+            padding: 22px;
+        }
+
+        .info {
+            background: white;
+            padding: 17px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .member {
+            background: white;
+            padding: 18px;
+            border-radius: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+        }
+
+        .member-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .member-role {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .save {
+            width: 100%;
+            margin-top: 10px;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            background: #174d35;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+
+        <div class="back" onclick="history.back()">
+            ←
+        </div>
+
+        <h1>Data Baju 👕</h1>
+
+        <p>
+            Pilih ukuran baju untuk setiap anggota keluarga.
+        </p>
+
+    </div>
+
+    <div class="content">
+
+        <div class="info">
+            Silakan periksa kembali ukuran baju sebelum
+            menyimpan data.
+        </div>
+        
+<div id="daftarKeluarga"></div>
+
+        <button class="save" onclick="simpan()">
+            SIMPAN DATA
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+async function simpan() {
+
+    const nikLogin = localStorage.getItem("nikLogin");
+
+    if (!nikLogin) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const semuaSelect = document.querySelectorAll(
+        "#daftarKeluarga select"
+    );
+
+    const ukuranBaru = [];
+
+    semuaSelect.forEach(function(select, index) {
+
+        ukuranBaru.push({
+            index: index,
+            ukuranBaju: select.value
+        });
+
+    });
+
+    const { error } = await supabaseClient
+        .rpc("simpan_baju", {
+            p_nik: nikLogin,
+            p_keluarga: ukuranBaru
+        });
+
+    if (error) {
+        console.log(error);
+        alert("Gagal menyimpan data baju.");
+        return;
+    }
+
+    alert("Data ukuran baju berhasil disimpan!");
+}
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+async function loadBaju() {
+
+    const nikLogin = localStorage.getItem("nikLogin");
+
+    if (!nikLogin) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("ambil_peserta", {
+            p_nik: nikLogin
+        })
+        .maybeSingle();
+
+    if (error) {
+        console.log(error);
+        alert("Gagal mengambil data baju.");
+        return;
+    }
+
+    if (!data) {
+        localStorage.removeItem("nikLogin");
+        window.location.href = "login.html";
+        return;
+    }
+
+    const daftar = document.getElementById("daftarKeluarga");
+
+    daftar.innerHTML = "";
+
+    data.keluarga.forEach(function(anggota) {
+
+        const member = document.createElement("div");
+        member.className = "member";
+
+        member.innerHTML = `
+            <div class="member-name">
+                ${anggota.nama}
+            </div>
+
+            <div class="member-role">
+                ${anggota.hubungan}
+            </div>
+
+            <select>
+                <option value="">Pilih ukuran</option>
+                <option ${anggota.ukuranBaju === "XS" ? "selected" : ""}>XS</option>
+                <option ${anggota.ukuranBaju === "S" ? "selected" : ""}>S</option>
+                <option ${anggota.ukuranBaju === "M" ? "selected" : ""}>M</option>
+                <option ${anggota.ukuranBaju === "L" ? "selected" : ""}>L</option>
+                <option ${anggota.ukuranBaju === "XL" ? "selected" : ""}>XL</option>
+                <option ${anggota.ukuranBaju === "XXL" ? "selected" : ""}>XXL</option>
+                <option ${anggota.ukuranBaju === "XXXL" ? "selected" : ""}>XXXL</option>
+            </select>
+        `;
+
+        daftar.appendChild(member);
+    });
+}
+
+loadBaju();
+</script>
+</body>
+</html>

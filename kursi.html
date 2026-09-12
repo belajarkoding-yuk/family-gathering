@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Denah Kursi Bus</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: #f7f9f8;
+        }
+
+        .header {
+            background: #174d35;
+            color: white;
+            padding: 30px 22px;
+            border-radius: 0 0 28px 28px;
+        }
+
+        .back {
+            font-size: 25px;
+            margin-bottom: 18px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-size: 25px;
+        }
+
+        .header p {
+            margin-top: 7px;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .bus {
+            background: white;
+            border: 2px solid #dce5df;
+            border-radius: 25px;
+            padding: 18px 12px;
+        }
+
+        .driver {
+            background: #edf7f0;
+            padding: 13px;
+            text-align: center;
+            border-radius: 14px;
+            margin-bottom: 22px;
+            font-weight: bold;
+        }
+
+        .door {
+            text-align: right;
+            color: #888;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .seats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 30px 1fr 1fr;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .aisle {
+            width: 30px;
+        }
+
+        .seat {
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+        }
+
+        .empty {
+            background: #eeeeee;
+            color: #666;
+        }
+
+        .family {
+            background: #ccebd5;
+            color: #1c6b39;
+            border: 2px solid #4b9b61;
+        }
+
+        .occupied {
+            background: #f2d2d2;
+            color: #9b3a3a;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+            font-size: 11px;
+        }
+
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .dot-empty {
+            background: #eeeeee;
+        }
+
+        .dot-family {
+            background: #ccebd5;
+            border: 1px solid #4b9b61;
+        }
+
+        .dot-occupied {
+            background: #f2d2d2;
+        }
+
+        .my-seat {
+            margin-top: 20px;
+            background: #174d35;
+            color: white;
+            padding: 17px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .my-seat strong {
+            display: block;
+            font-size: 21px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+
+        <div class="back" onclick="history.back()">
+            ←
+        </div>
+
+        <h1>Denah Kursi 💺</h1>
+
+        <p>Bus Nomor 01 · 40 Kursi</p>
+
+    </div>
+
+    <div class="content">
+
+        <div class="bus">
+
+            <div class="driver">
+                🚌 DEPAN BUS · PENGEMUDI
+            </div>
+
+            <div class="door">
+                PINTU
+            </div>
+
+            <div class="seats" id="daftarKursi"></div>
+
+        </div>
+
+        <div class="legend">
+
+            <span>
+                <i class="dot dot-family"></i>
+                Keluarga Anda
+            </span>
+
+            <span>
+                <i class="dot dot-empty"></i>
+                Kosong
+            </span>
+
+            <span>
+                <i class="dot dot-occupied"></i>
+                Terisi
+            </span>
+
+        </div>
+
+        <div class="my-seat">
+          Kursi Anda <span id="kursiAnda">-</span>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+async function loadKursi() {
+
+    const nikLogin = localStorage.getItem("nikLogin");
+
+    if (!nikLogin) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("ambil_peserta", {
+            p_nik: nikLogin
+        })
+        .maybeSingle();
+
+    if (error) {
+        console.log(error);
+        alert("Gagal mengambil data kursi.");
+        return;
+    }
+
+    if (!data) {
+        localStorage.removeItem("nikLogin");
+        window.location.href = "login.html";
+        return;
+    }
+
+    const daftarKursi =
+        document.getElementById("daftarKursi");
+
+    daftarKursi.innerHTML = "";
+
+    // Tampilkan kursi Anda
+    const pesertaUtama = data.keluarga.find(function(item) {
+        return item.hubungan === "Peserta Utama";
+    });
+
+    if (pesertaUtama) {
+        document.getElementById("kursiAnda").textContent =
+            pesertaUtama.kursi;
+    }
+
+    // Buat 40 kursi
+    for (let nomor = 1; nomor <= 40; nomor++) {
+
+        const nomorKursi =
+            String(nomor).padStart(2, "0");
+
+        // Lorong setelah 2 kursi
+        const posisi = (nomor - 1) % 4;
+
+        if (posisi === 2) {
+            const lorong =
+                document.createElement("div");
+
+            lorong.className = "aisle";
+
+            daftarKursi.appendChild(lorong);
+        }
+
+        const kursi =
+            document.createElement("div");
+
+        kursi.className = "seat empty";
+
+        kursi.textContent = nomorKursi;
+
+        const anggota =
+            data.keluarga.find(function(item) {
+                return item.kursi === nomorKursi;
+            });
+
+        if (anggota) {
+            kursi.className = "seat family";
+        }
+
+        daftarKursi.appendChild(kursi);
+    }
+}
+
+loadKursi();
+</script>
+</body>
+</html>

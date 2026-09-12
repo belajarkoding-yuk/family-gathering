@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - Family Gathering</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: white;
+            padding: 30px 25px;
+        }
+
+        .back {
+            font-size: 25px;
+            color: #174d35;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: #edf7f0;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #777;
+            line-height: 1.5;
+            margin-bottom: 35px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 17px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #174d35;
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 25px;
+            padding: 17px;
+            border: none;
+            border-radius: 15px;
+            background: #174d35;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff8e8;
+            border-radius: 12px;
+            color: #777;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="back" onclick="history.back()">
+        ←
+    </div>
+
+    <div class="logo">
+        👨‍👩‍👧‍👦
+    </div>
+
+    <h1>Selamat Datang</h1>
+
+    <p class="subtitle">
+        Silakan masukkan NIK Anda untuk
+        melanjutkan ke aplikasi Family Gathering.
+    </p>
+
+    <label for="nik">NIK</label>
+
+    <input
+        type="text"
+        id="nik"
+        placeholder="Masukkan NIK"
+        inputmode="numeric"
+        maxlength="16"
+    >
+
+    <button class="btn" onclick="login()">
+        MASUK
+    </button>
+
+    <div class="info">
+        💡 Masukkan NIK yang telah terdaftar
+        sebagai peserta Family Gathering.
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+async function login() {
+
+    const nik = document.getElementById("nik").value.trim();
+
+    if (nik === "") {
+        alert("Silakan masukkan NIK terlebih dahulu.");
+        return;
+    }
+
+    if (nik.length !== 16) {
+        alert("NIK harus terdiri dari 16 digit.");
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("login_peserta", {
+            p_nik: nik
+        })
+        .maybeSingle();
+
+    if (error) {
+        alert("Gagal menghubungkan ke database.");
+        console.log(error);
+        return;
+    }
+
+    if (!data) {
+        alert("NIK tidak terdaftar.");
+        return;
+    }
+
+    localStorage.setItem("nikLogin", data.nik);
+
+    window.location.href = "dashboard.html";
+}
+</script>
+</body>
+</html>

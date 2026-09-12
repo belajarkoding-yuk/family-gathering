@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - Family Gathering</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: #f7f9f8;
+        }
+
+        .header {
+            background: #174d35;
+            color: white;
+            padding: 45px 25px 30px;
+            border-radius: 0 0 30px 30px;
+        }
+
+        .header small {
+            opacity: 0.75;
+        }
+
+        .header h1 {
+            margin-top: 8px;
+            font-size: 26px;
+        }
+
+        .header p {
+            margin-top: 6px;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 22px;
+        }
+
+        .status {
+            background: white;
+            padding: 18px;
+            border-radius: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .status-title {
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .status p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 7px 12px;
+            background: #e7f5eb;
+            color: #287044;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px 16px;
+            border-radius: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            cursor: pointer;
+        }
+
+        .card:active {
+            transform: scale(0.97);
+        }
+
+        .icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .card p {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .wide {
+            grid-column: span 2;
+        }
+
+        .logout {
+            width: 100%;
+            border: none;
+            background: #fff;
+            color: #b33b3b;
+            padding: 16px;
+            margin-top: 20px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 11px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+        <small>FAMILY GATHERING 2026</small>
+        <h1 id="namaPeserta"> Halo 👋</h1>
+        <p>Selamat datang di aplikasi acara keluarga.</p>
+    </div>
+
+    <div class="content">
+
+        <div class="status">
+            <div class="status-title">
+                Status Peserta
+            </div>
+
+            <p id="nikPeserta">NIK: -</p>
+
+            <span class="badge">
+                ✓ TERDAFTAR
+            </span>
+        </div>
+
+        <div class="menu">
+
+            <div class="card" onclick="window.location.href='baju.html'">
+    <div class="icon">👕</div>
+    <h3>Data Baju</h3>
+    <p>Ukuran baju keluarga</p>
+</div>
+            <div class="card" onclick="window.location.href='transportasi.html'">
+    <div class="icon">🚌</div>
+    <h3>Transportasi</h3>
+    <p>Informasi bus</p>
+</div>
+            <div class="card wide" onclick
+                ="window.location.href='kursi.html'">
+    <div class="icon">💺</div>
+    <h3>Denah Kursi Bus</h3>
+    <p>Lihat posisi kursi dan anggota keluarga</p>
+</div>
+
+<div class="card wide" onclick="window.location.href='profil.html'">
+    <div class="icon">👤</div>
+    <h3>Profil</h3>
+    <p>Lihat data peserta dan keluarga</p>
+</div>
+
+        </div>
+
+        <button class="logout" onclick="logout()">
+            Keluar
+        </button>
+
+    </div>
+
+    <div class="footer">
+        Family Gathering © 2026
+    </div>
+
+</div>
+
+
+
+<script>
+function logout() {
+    localStorage.removeItem("nikLogin");
+    window.location.href = "index.html";
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+async function loadPeserta() {
+
+    const nikLogin = localStorage.getItem("nikLogin");
+
+    if (!nikLogin) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("ambil_peserta", {
+            p_nik: nikLogin
+        })
+        .maybeSingle();
+
+    if (error) {
+        console.log(error);
+        alert("Gagal mengambil data peserta.");
+        return;
+    }
+
+    if (!data) {
+        localStorage.removeItem("nikLogin");
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("namaPeserta").textContent =
+        "Halo, " + data.nama + " 👋";
+
+    document.getElementById("nikPeserta").textContent =
+        "NIK: " + data.nik;
+}
+
+loadPeserta();
+</script>
+</body>
+</html>
