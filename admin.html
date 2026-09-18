@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login Admin - Family Gathering</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            color: #174d3a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 40px 24px;
+        }
+
+        .back {
+            font-size: 28px;
+            cursor: pointer;
+            margin-bottom: 45px;
+        }
+
+        .icon {
+            width: 90px;
+            height: 90px;
+            background: #eef8f2;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            color: #777;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px;
+            border: 1px solid #ddd;
+            border-radius: 18px;
+            font-size: 17px;
+            margin-bottom: 22px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 18px;
+            background: #14583f;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 18px;
+            background: #fff8e8;
+            border-radius: 18px;
+            color: #777;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="back" onclick="window.location.href='index.html'">
+        ←
+    </div>
+
+    <div class="icon">
+        👨‍💼
+    </div>
+
+    <h1>Login Admin</h1>
+
+    <div class="description">
+        Silakan masuk menggunakan akun admin
+        untuk mengelola data Family Gathering.
+    </div>
+
+    <label>Email Admin</label>
+
+    <input
+        type="email"
+        id="email"
+        placeholder="Masukkan email admin"
+    >
+
+    <label>Password</label>
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Masukkan password"
+    >
+
+    <button class="btn" onclick="loginAdmin()">
+        LOGIN ADMIN
+    </button>
+
+    <div class="info">
+        💡 Halaman ini khusus untuk admin.
+        Peserta tetap menggunakan login NIK.
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+async function loginAdmin() {
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    if (email === "" || password === "") {
+        alert("Email dan password harus diisi.");
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+    if (error) {
+        console.log(error);
+        alert("Email atau password admin salah.");
+        return;
+    }
+
+    window.location.href = "admin-dashboard.html";
+}
+
+</script>
+
+</body>
+</html>

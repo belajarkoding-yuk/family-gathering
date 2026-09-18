@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Kursi</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7faf8;
+            color: #174d3a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .back {
+            font-size: 28px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .anggota {
+            padding: 15px;
+            margin-top: 12px;
+            background: #f7faf8;
+            border-radius: 14px;
+        }
+
+        .nama-anggota {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .hubungan {
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 14px;
+            background: #14583f;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            color: #777;
+            padding: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="back"
+        onclick="window.location.href='kursi-admin.html'">
+        ←
+    </div>
+
+    <h1>Edit Kursi 🪑</h1>
+
+    <div class="subtitle">
+        Atur nomor kursi peserta dan anggota keluarga
+    </div>
+
+    <div id="formContainer">
+        <div class="loading">
+            Memuat data...
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+async function cekAdmin() {
+
+    const { data, error } =
+        await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
+        window.location.href = "admin.html";
+        return false;
+    }
+
+    const userId = data.session.user.id;
+
+    const { data: admin, error: adminError } =
+        await supabaseClient
+            .from("admin_users")
+            .select("id, role")
+            .eq("user_id", userId)
+            .eq("role", "admin")
+            .maybeSingle();
+
+    if (adminError || !admin) {
+        await supabaseClient.auth.signOut();
+        window.location.href = "admin.html";
+        return false;
+    }
+
+    return true;
+}
+
+
+async function loadKursi() {
+
+    const aman = await cekAdmin();
+
+    if (!aman) {
+        return;
+    }
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const nik =
+        params.get("nik");
+
+    if (!nik) {
+
+        document.getElementById("formContainer").innerHTML = `
+            <div class="card">
+                NIK peserta tidak ditemukan.
+            </div>
+        `;
+
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .rpc("ambil_semua_peserta_admin");
+
+    if (error) {
+
+        console.log(error);
+
+        document.getElementById("formContainer").innerHTML = `
+            <div class="card">
+                Gagal mengambil data peserta.
+            </div>
+        `;
+
+        return;
+    }
+
+    const peserta =
+        data.find(function(item) {
+            return item.nik === nik;
+        });
+
+    if (!peserta) {
+
+        document.getElementById("formContainer").innerHTML = `
+            <div class="card">
+                Peserta tidak ditemukan.
+            </div>
+        `;
+
+        return;
+    }
+
+    let isiForm = "";
+
+    if (Array.isArray(peserta.keluarga)) {
+
+        peserta.keluarga.forEach(function(anggota, index) {
+
+            const nomorKursi =
+                anggota.nomorKursi ||
+                anggota.kursi ||
+                "";
+
+            isiForm += `
+
+                <div class="anggota">
+
+                    <div class="nama-anggota">
+                        ${anggota.nama || "-"}
+                    </div>
+
+                    <div class="hubungan">
+                        Hubungan:
+                        ${anggota.hubungan || "-"}
+                    </div>
+
+                    <label>
+                        🪑 Nomor Kursi
+                    </label>
+
+                    <input
+                        type="text"
+                        id="kursi-${index}"
+                        value="${nomorKursi}"
+                        placeholder="Contoh: 7"
+                    >
+
+                </div>
+
+            `;
+        });
+    }
+
+    document.getElementById("formContainer").innerHTML = `
+
+        <div class="card">
+
+            <h2>${peserta.nama}</h2>
+
+            <div>
+                NIK: ${peserta.nik}
+            </div>
+
+            ${isiForm || `
+                <p>
+                    Belum ada anggota keluarga.
+                </p>
+            `}
+
+            <button
+                class="btn"
+                onclick="simpanKursi()">
+                SIMPAN KURSI
+            </button>
+
+        </div>
+
+    `;
+}
+
+
+async function simpanKursi() {
+    
+    const aman = await cekAdmin();
+    
+    if (!aman) {
+        return;
+    }
+    
+    const params =
+        new URLSearchParams(window.location.search);
+    
+    const nik =
+        params.get("nik");
+    
+    const { data, error } =
+    await supabaseClient
+        .rpc("ambil_semua_peserta_admin");
+    
+    if (error) {
+        console.log(error);
+        alert("Gagal mengambil data peserta.");
+        return;
+    }
+    
+    const peserta =
+        data.find(p => p.nik === nik);
+    
+    if (!peserta) {
+        alert("Peserta tidak ditemukan.");
+        return;
+    }
+    
+    const keluarga =
+        peserta.keluarga || [];
+    
+    keluarga.forEach((anggota, index) => {
+        
+        const input =
+            document.getElementById("kursi-" + index);
+        
+        if (input) {
+            anggota.nomorKursi =
+                input.value.trim();
+        }
+        
+    });
+    
+    const { error: errorSimpan } =
+    await supabaseClient
+        .rpc("edit_kursi_admin", {
+            p_nik: nik,
+            p_keluarga: keluarga
+        });
+    
+    if (errorSimpan) {
+        console.log(errorSimpan);
+        alert("Gagal menyimpan nomor kursi.");
+        return;
+    }
+    
+    alert("Nomor kursi berhasil disimpan.");
+    
+    window.location.href =
+        "kursi-admin.html";
+}
+
+
+loadKursi();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tambah Peserta</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7faf8;
+            color: #174d3a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .back {
+            font-size: 28px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 16px 0 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .member {
+            border: 1px solid #e1e1e1;
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 15px;
+        }
+
+        .member-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 17px;
+            border: none;
+            border-radius: 16px;
+            background: #14583f;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-secondary {
+            background: #eaf3ee;
+            color: #14583f;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="back"
+         onclick="window.location.href='peserta-admin.html'">
+        ←
+    </div>
+
+    <h1>Tambah Peserta 👨‍👩‍👧‍👦</h1>
+
+    <div class="subtitle">
+        Masukkan data peserta dan anggota keluarganya.
+    </div>
+
+
+    <div class="card">
+
+        <h2>Data Peserta</h2>
+
+        <label>Nama Peserta</label>
+
+        <input
+            type="text"
+            id="nama"
+            placeholder="Contoh: Shihab"
+        >
+
+        <label>NIK</label>
+
+        <input
+            type="text"
+            id="nik"
+            inputmode="numeric"
+            maxlength="16"
+            placeholder="Masukkan NIK 16 digit"
+        >
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>Anggota Keluarga</h2>
+
+        <div id="daftarKeluarga"></div>
+
+        <button
+            class="btn btn-secondary"
+            onclick="tambahKeluarga()">
+            ➕ TAMBAH ANGGOTA KELUARGA
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>Transportasi 🚌</h2>
+
+        <label>Bus</label>
+
+        <input
+            type="text"
+            id="bus"
+            value="Bus Nomor 01"
+        >
+
+        <label>Keberangkatan</label>
+
+        <input
+            type="text"
+            id="keberangkatan"
+            value="06:30 WIB"
+        >
+
+        <label>Titik Kumpul</label>
+
+        <input
+            type="text"
+            id="titikKumpul"
+            value="Kantor"
+        >
+
+        <label>Tujuan</label>
+
+        <input
+            type="text"
+            id="tujuan"
+            value="The Jungle Waterpark Bogor"
+        >
+
+    </div>
+
+
+    <button
+        class="btn"
+        onclick="simpanPeserta()">
+        💾 SIMPAN PESERTA
+    </button>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+let nomorAnggota = 0;
+
+
+function tambahKeluarga() {
+
+    nomorAnggota++;
+
+    const daftar =
+        document.getElementById("daftarKeluarga");
+
+    const member =
+        document.createElement("div");
+
+    member.className = "member";
+
+    member.innerHTML = `
+
+        <div class="member-title">
+            Anggota ${nomorAnggota}
+        </div>
+
+        <label>Nama</label>
+
+        <input
+            type="text"
+            class="namaKeluarga"
+            placeholder="Nama anggota keluarga"
+        >
+
+        <label>Hubungan</label>
+
+        <input
+            type="text"
+            class="hubunganKeluarga"
+            placeholder="Contoh: Kakak"
+        >
+
+        <label>Ukuran Baju</label>
+
+        <select class="ukuranKeluarga">
+
+            <option value="">Pilih ukuran</option>
+            <option>XS</option>
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+            <option>XL</option>
+            <option>XXL</option>
+            <option>XXXL</option>
+
+        </select>
+
+        <label>Nomor Kursi</label>
+
+        <input
+            type="text"
+            class="kursiKeluarga"
+            placeholder="Contoh: 07"
+            maxlength="2"
+        >
+    `;
+
+    daftar.appendChild(member);
+}
+
+
+async function cekAdmin() {
+
+    const { data, error } =
+        await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
+
+        window.location.href = "admin.html";
+
+        return false;
+    }
+
+    const userId = data.session.user.id;
+
+    const { data: admin, error: adminError } =
+        await supabaseClient
+            .from("admin_users")
+            .select("id, role")
+            .eq("user_id", userId)
+            .eq("role", "admin")
+            .maybeSingle();
+
+    if (adminError || !admin) {
+
+        await supabaseClient.auth.signOut();
+
+        window.location.href = "admin.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+async function simpanPeserta() {
+
+    const aman = await cekAdmin();
+
+    if (!aman) {
+        return;
+    }
+
+    const nama =
+        document.getElementById("nama").value.trim();
+
+    const nik =
+        document.getElementById("nik").value.trim();
+
+    if (nama === "") {
+        alert("Nama peserta harus diisi.");
+        return;
+    }
+
+    if (nik.length !== 16) {
+        alert("NIK harus terdiri dari 16 digit.");
+        return;
+    }
+
+    const namaKeluarga =
+        document.querySelectorAll(".namaKeluarga");
+
+    const hubunganKeluarga =
+        document.querySelectorAll(".hubunganKeluarga");
+
+    const ukuranKeluarga =
+        document.querySelectorAll(".ukuranKeluarga");
+
+    const kursiKeluarga =
+        document.querySelectorAll(".kursiKeluarga");
+
+    if (namaKeluarga.length === 0) {
+        alert("Tambahkan minimal 1 anggota keluarga.");
+        return;
+    }
+
+    const keluarga = [];
+
+    for (let i = 0; i < namaKeluarga.length; i++) {
+
+        const namaAnggota =
+            namaKeluarga[i].value.trim();
+
+        const hubungan =
+            hubunganKeluarga[i].value.trim();
+
+        const ukuran =
+            ukuranKeluarga[i].value;
+
+        const kursi =
+            kursiKeluarga[i].value.trim();
+
+        if (
+            namaAnggota === "" ||
+            hubungan === "" ||
+            ukuran === "" ||
+            kursi === ""
+        ) {
+            alert(
+                "Data anggota keluarga nomor " +
+                (i + 1) +
+                " belum lengkap."
+            );
+            return;
+        }
+
+        keluarga.push({
+            nama: namaAnggota,
+            hubungan: hubungan,
+            ukuranBaju: ukuran,
+            kursi: kursi.padStart(2, "0")
+        });
+    }
+
+    const transportasi = {
+
+        bus:
+            document.getElementById("bus").value.trim(),
+
+        keberangkatan:
+            document.getElementById("keberangkatan").value.trim(),
+
+        titikKumpul:
+            document.getElementById("titikKumpul").value.trim(),
+
+        tujuan:
+            document.getElementById("tujuan").value.trim()
+    };
+
+
+    const { error } =
+        await supabaseClient
+            .rpc("tambah_peserta_admin", {
+                p_nik: nik,
+                p_nama: nama,
+                p_keluarga: keluarga,
+                p_transportasi: transportasi
+            });
+
+
+    if (error) {
+
+        console.log(error);
+
+        if (error.code === "23505") {
+            alert("NIK tersebut sudah terdaftar.");
+        } else {
+            alert("Gagal menyimpan peserta.");
+        }
+
+        return;
+    }
+
+
+    alert("Peserta berhasil ditambahkan! 🎉");
+
+    window.location.href = "peserta-admin.html";
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Transportasi</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7faf8;
+            color: #174d3a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .back {
+            font-size: 28px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 25px;
+            border: none;
+            border-radius: 14px;
+            background: #14583f;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            color: #777;
+            padding: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="back"
+        onclick="window.location.href='transportasi-admin.html'">
+        ←
+    </div>
+
+    <h1>Edit Transportasi 🚌</h1>
+
+    <div class="subtitle">
+        Ubah data transportasi peserta
+    </div>
+
+    <div id="formContainer">
+        <div class="loading">
+            Memuat data...
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+async function cekAdmin() {
+
+    const { data, error } =
+        await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
+        window.location.href = "admin.html";
+        return false;
+    }
+
+    const userId = data.session.user.id;
+
+    const { data: admin, error: adminError } =
+        await supabaseClient
+            .from("admin_users")
+            .select("id, role")
+            .eq("user_id", userId)
+            .eq("role", "admin")
+            .maybeSingle();
+
+    if (adminError || !admin) {
+        await supabaseClient.auth.signOut();
+        window.location.href = "admin.html";
+        return false;
+    }
+
+    return true;
+}
+
+
+async function loadTransportasi() {
+
+    const aman = await cekAdmin();
+
+    if (!aman) {
+        return;
+    }
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const nik =
+        params.get("nik");
+
+    if (!nik) {
+
+        document.getElementById("formContainer").innerHTML = `
+            <div class="card">
+                NIK peserta tidak ditemukan.
+            </div>
+        `;
+
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .rpc("ambil_semua_peserta_admin");
+
+    if (error) {
+
+        console.log(error);
+
+        document.getElementById("formContainer").innerHTML = `
+            <div class="card">
+                Gagal mengambil data peserta.
+            </div>
+        `;
+
+        return;
+    }
+
+    const peserta =
+        data.find(function(item) {
+            return item.nik === nik;
+        });
+
+    if (!peserta) {
+
+        document.getElementById("formContainer").innerHTML = `
+            <div class="card">
+                Peserta tidak ditemukan.
+            </div>
+        `;
+
+        return;
+    }
+
+    const transportasi =
+        peserta.transportasi || {};
+
+    document.getElementById("formContainer").innerHTML = `
+
+        <div class="card">
+
+            <h2>${peserta.nama}</h2>
+
+            <div>
+                NIK: ${peserta.nik}
+            </div>
+
+            <label>
+                🚌 Bus
+            </label>
+
+            <input
+                type="text"
+                id="bus"
+                value="${transportasi.bus || ""}"
+                placeholder="Contoh: Bus Nomor 01"
+            >
+
+            <label>
+                🕐 Jam Keberangkatan
+            </label>
+
+            <input
+                type="text"
+                id="jam"
+                value="${transportasi.jam || ""}"
+                placeholder="Contoh: 06:30 WIB"
+            >
+
+            <label>
+                📍 Titik Kumpul
+            </label>
+
+            <input
+                type="text"
+                id="titikKumpul"
+                value="${transportasi.titikKumpul || ""}"
+                placeholder="Contoh: Kantor"
+            >
+
+            <label>
+                🎯 Tujuan
+            </label>
+
+            <input
+                type="text"
+                id="tujuan"
+                value="${transportasi.tujuan || ""}"
+                placeholder="Contoh: The Jungle Waterpark Bogor"
+            >
+
+           <button class="btn" onclick="simpanTransportasi()">
+  SIMPAN TRANSPORTASI
+</button>
+        </div>
+
+    `;
+}
+
+async function simpanTransportasi() {
+
+    const aman = await cekAdmin();
+
+    if (!aman) {
+        return;
+    }
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const nik =
+        params.get("nik");
+
+    const bus =
+        document.getElementById("bus").value;
+
+    const jam =
+        document.getElementById("jam").value;
+
+    const titikKumpul =
+        document.getElementById("titikKumpul").value;
+
+    const tujuan =
+        document.getElementById("tujuan").value;
+
+    const { error } =
+        await supabaseClient
+            .rpc("edit_transportasi_admin", {
+                p_nik: nik,
+                p_bus: bus,
+                p_jam: jam,
+                p_titik_kumpul: titikKumpul,
+                p_tujuan: tujuan
+            });
+
+    if (error) {
+
+        console.log(error);
+
+        alert("Gagal menyimpan transportasi.");
+
+        return;
+    }
+
+    alert("Data transportasi berhasil disimpan.");
+
+    window.location.href =
+        "transportasi-admin.html";
+}
+loadTransportasi();
+
+</script>
+
+</body>
+</html>

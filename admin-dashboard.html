@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - Family Gathering</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7faf8;
+            color: #174d3a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 25px 20px 40px;
+        }
+
+        .header {
+            background: #14583f;
+            color: white;
+            padding: 30px 25px;
+            border-radius: 24px;
+            margin-bottom: 25px;
+        }
+
+        .header small {
+            opacity: 0.8;
+        }
+
+        .header h1 {
+            margin: 12px 0 5px;
+            font-size: 30px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 21px;
+        }
+
+        .card p {
+            color: #777;
+            line-height: 1.5;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 17px;
+            border: none;
+            border-radius: 17px;
+            background: #14583f;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .logout {
+            background: #eeeeee;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <small>FAMILY GATHERING 2026</small>
+        <h1>Dashboard Admin 👨‍💼</h1>
+        <p>Kelola data peserta acara keluarga.</p>
+    </div>
+
+    <div class="card">
+        <h2>👨‍👩‍👧‍👦 Data Peserta</h2>
+        <p>
+            Tambah, edit, dan hapus data peserta
+            Family Gathering.
+        </p>
+
+        <button class="btn" onclick="window.location.href='peserta-admin.html'">
+    KELOLA PESERTA
+</button>
+    </div>
+
+    <div class="card">
+        <h2>🚌 Transportasi</h2>
+        <p>
+            Kelola bus, keberangkatan,
+            titik kumpul, dan tujuan.
+        </p>
+
+        <button class="btn" onclick
+        ="window.location.href
+        ='transportasi-admin.html'">
+            KELOLA TRANSPORTASI
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>💺 Kursi Bus</h2>
+        <p>
+            Atur nomor kursi untuk setiap peserta
+            dan anggota keluarga.
+        </p>
+
+        <button class="btn" onclick
+        ="window.location.href
+        ='kursi-admin.html'">
+            KELOLA KURSI
+        </button>
+    </div>
+
+    <button class="btn logout" onclick="logout()">
+        KELUAR
+    </button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+async function cekAdmin() {
+
+    const { data, error } =
+        await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
+        window.location.href = "admin.html";
+        return;
+    }
+
+    const userId = data.session.user.id;
+
+    const { data: admin, error: adminError } =
+        await supabaseClient
+            .from("admin_users")
+            .select("id, role")
+            .eq("user_id", userId)
+            .eq("role", "admin")
+            .maybeSingle();
+
+    if (adminError || !admin) {
+        await supabaseClient.auth.signOut();
+        window.location.href = "admin.html";
+        return;
+   
+    }
+}
+
+async function logout() {
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href = "index.html";
+}
+
+cekAdmin();
+
+</script>
+
+</body>
+</html>
