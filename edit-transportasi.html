@@ -199,7 +199,10 @@ async function loadTransportasi() {
 
     const transportasi =
         peserta.transportasi || {};
-
+    
+    const busTerpilih =
+        transportasi.bus || "";
+    
     document.getElementById("formContainer").innerHTML = `
 
         <div class="card">
@@ -214,12 +217,13 @@ async function loadTransportasi() {
                 🚌 Bus
             </label>
 
-            <input
-                type="text"
-                id="bus"
-                value="${transportasi.bus || ""}"
-                placeholder="Contoh: Bus Nomor 01"
-            >
+            <select id="bus">
+
+    <option value="">
+        Pilih Bus
+    </option>
+
+</select>
 
             <label>
                 🕐 Jam Keberangkatan
@@ -261,7 +265,44 @@ async function loadTransportasi() {
 
     `;
 }
+async function loadDaftarBus(busTerpilih) {
 
+    const { data, error } =
+        await supabaseClient
+            .from("bus")
+            .select("id, nama_bus")
+            .order("created_at", { ascending: true });
+
+    if (error) {
+
+        console.log(error);
+
+        return;
+    }
+
+    const pilihanBus =
+        document.getElementById("bus");
+
+    if (!pilihanBus) {
+        return;
+    }
+
+    data.forEach(function(bus) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = bus.nama_bus;
+        option.textContent = bus.nama_bus;
+
+        if (bus.nama_bus === busTerpilih) {
+            option.selected = true;
+        }
+
+        pilihanBus.appendChild(option);
+
+    });
+}
 async function simpanTransportasi() {
 
     const aman = await cekAdmin();
