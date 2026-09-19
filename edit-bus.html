@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Bus</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: white;
+            padding: 25px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            background: #174d35;
+            color: white;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .back {
+            background: #777;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <button
+        class="btn back"
+        onclick="window.location.href='bus-admin.html'">
+        ← KEMBALI
+    </button>
+
+    <h1>✏️ Edit Bus</h1>
+
+    <label>Nama Bus</label>
+    <input type="text" id="namaBus">
+
+    <label>Jam</label>
+    <input type="text" id="jam">
+
+    <label>Titik Kumpul</label>
+    <input type="text" id="titikKumpul">
+
+    <label>Tujuan</label>
+    <input type="text" id="tujuan">
+
+    <label>Kapasitas Kursi</label>
+    <input type="number" id="kapasitas">
+
+    <button class="btn">
+        SIMPAN PERUBAHAN
+    </button>
+
+</div>
+
+</body>
+</html>
