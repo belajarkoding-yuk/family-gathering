@@ -214,7 +214,11 @@ async function loadBus() {
                 💺 Kapasitas:
                 ${bus.kapasitas || 0} kursi
             </div>
-
+<button
+    class="btn"
+    onclick="window.location.href='edit-bus.html?id=${bus.id}'">
+    ✏️ EDIT BUS
+</button>
         `;
 
         daftar.appendChild(card);
