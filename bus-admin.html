@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Kelola Bus</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: white;
+            padding: 25px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #edf7f0;
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 18px;
+        }
+
+        .nama {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .data {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            background: #174d35;
+            color: white;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .back {
+            background: #777;
+            margin-bottom: 20px;
+        }
+
+        #status {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <button
+        class="btn back"
+        onclick="window.location.href='admin-dashboard.html'">
+        ← KEMBALI
+    </button>
+
+    <h1>🚍 Kelola Bus</h1>
+
+    <div id="status">
+        Memuat data bus...
+    </div>
+
+    <div id="daftarBus"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+async function cekAdmin() {
+
+    const {
+        data: { session }
+    } =
+        await supabaseClient.auth.getSession();
+
+    if (!session) {
+
+        window.location.href =
+            "admin.html";
+
+        return false;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .from("admin_users")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .eq("role", "admin")
+            .maybeSingle();
+
+    if (error || !data) {
+
+        alert("Akses hanya untuk admin.");
+
+        window.location.href =
+            "index.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+async function loadBus() {
+
+    const aman =
+        await cekAdmin();
+
+    if (!aman) {
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .rpc("ambil_semua_bus_admin");
+
+    if (error) {
+
+        console.log(error);
+
+        document.getElementById("status")
+            .innerText =
+            "Gagal mengambil data bus.";
+
+        return;
+    }
+
+    const daftar =
+        document.getElementById("daftarBus");
+
+    document.getElementById("status")
+        .style.display = "none";
+
+    daftar.innerHTML = "";
+
+    if (!data || data.length === 0) {
+
+        daftar.innerHTML = `
+            <div class="card">
+                Belum ada data bus.
+            </div>
+        `;
+
+        return;
+    }
+
+    data.forEach(bus => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "card";
+
+        card.innerHTML = `
+
+            <div class="nama">
+                🚍 ${bus.nama_bus}
+            </div>
+
+            <div class="data">
+                🕐 Jam: ${bus.jam || "-"}
+            </div>
+
+            <div class="data">
+                📍 Titik kumpul:
+                ${bus.titik_kumpul || "-"}
+            </div>
+
+            <div class="data">
+                🎯 Tujuan:
+                ${bus.tujuan || "-"}
+            </div>
+
+            <div class="data">
+                💺 Kapasitas:
+                ${bus.kapasitas || 0} kursi
+            </div>
+
+        `;
+
+        daftar.appendChild(card);
+
+    });
+
+}
+
+
+loadBus();
+
+</script>
+
+</body>
+</html>
+
+
