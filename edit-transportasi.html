@@ -263,8 +263,11 @@ async function loadTransportasi() {
 </button>
         </div>
 
-    `;
+        `;
+
+    await loadDaftarBus(busTerpilih);
 }
+
 async function loadDaftarBus(busTerpilih) {
 
     const { data, error } =
