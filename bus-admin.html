@@ -232,7 +232,34 @@ async function loadBus() {
 
 }
 
+async function hapusBus(id) {
 
+    const yakin =
+        confirm("Apakah kamu yakin ingin menghapus bus ini?");
+
+    if (!yakin) {
+        return;
+    }
+
+    const { error } =
+        await supabaseClient
+            .from("bus")
+            .delete()
+            .eq("id", id);
+
+    if (error) {
+
+        console.log(error);
+
+        alert("Gagal menghapus bus.");
+
+        return;
+    }
+
+    alert("Bus berhasil dihapus.");
+
+    loadBus();
+}
 loadBus();
 
 </script>
