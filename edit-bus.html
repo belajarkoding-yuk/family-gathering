@@ -100,6 +100,60 @@
     </button>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="supabase.js"></script>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const idBus = params.get("id");
+
+
+async function loadBus() {
+
+    if (!idBus) {
+        alert("ID bus tidak ditemukan.");
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .from("bus")
+            .select("*")
+            .eq("id", idBus)
+            .single();
+
+    if (error) {
+
+        console.log(error);
+
+        alert("Gagal mengambil data bus.");
+
+        return;
+    }
+
+    document.getElementById("namaBus").value =
+        data.nama_bus || "";
+
+    document.getElementById("jam").value =
+        data.jam || "";
+
+    document.getElementById("titikKumpul").value =
+        data.titik_kumpul || "";
+
+    document.getElementById("tujuan").value =
+        data.tujuan || "";
+
+    document.getElementById("kapasitas").value =
+        data.kapasitas || "";
+
+}
+
+
+loadBus();
+
+</script>
 </body>
 </html>
