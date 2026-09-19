@@ -298,6 +298,10 @@ async function loadDaftarBus(busTerpilih) {
         option.value = bus.nama_bus;
         option.textContent = bus.nama_bus;
 
+        option.dataset.jam = bus.jam || "";
+option.dataset.titikKumpul = bus.titik_kumpul || "";
+option.dataset.tujuan = bus.tujuan || "";
+
         if (bus.nama_bus === busTerpilih) {
             option.selected = true;
         }
