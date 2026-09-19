@@ -219,6 +219,11 @@ async function loadBus() {
     onclick="window.location.href='edit-bus.html?id=${bus.id}'">
     ✏️ EDIT BUS
 </button>
+<button
+    class="btn"
+    onclick="hapusBus('${bus.id}')">
+    🗑️ HAPUS BUS
+</button>
         `;
 
         daftar.appendChild(card);
