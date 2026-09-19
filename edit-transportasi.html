@@ -273,7 +273,7 @@ async function loadDaftarBus(busTerpilih) {
     const { data, error } =
         await supabaseClient
             .from("bus")
-            .select("id, nama_bus")
+            .select("id, nama_bus, jam, titik_kumpul, tujuan")
             .order("created_at", { ascending: true });
 
     if (error) {
