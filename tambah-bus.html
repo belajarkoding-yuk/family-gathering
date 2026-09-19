@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Tambah Bus</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: white;
+            padding: 25px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            background: #174d35;
+            color: white;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .back {
+            background: #777;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <button
+        class="btn back"
+        onclick="window.location.href='bus-admin.html'">
+        ← KEMBALI
+    </button>
+
+    <h1>🚍 Tambah Bus</h1>
+
+    <label>Nama Bus</label>
+    <input
+        type="text"
+        id="namaBus"
+        placeholder="Contoh: Bus Nomor 02">
+
+    <label>Jam</label>
+    <input
+        type="text"
+        id="jam"
+        placeholder="Contoh: 06:30 WIB">
+
+    <label>Titik Kumpul</label>
+    <input
+        type="text"
+        id="titikKumpul"
+        placeholder="Contoh: Kantor">
+
+    <label>Tujuan</label>
+    <input
+        type="text"
+        id="tujuan"
+        placeholder="Contoh: The Jungle Waterpark Bogor">
+
+    <label>Kapasitas Kursi</label>
+    <input
+        type="number"
+        id="kapasitas"
+        placeholder="Contoh: 40">
+
+    <button class="btn" onclick="simpanBus()">
+    SIMPAN BUS
+    </button>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script>
+
+async function simpanBus() {
+
+    const namaBus =
+        document.getElementById("namaBus").value.trim();
+
+    const jam =
+        document.getElementById("jam").value.trim();
+
+    const titikKumpul =
+        document.getElementById("titikKumpul").value.trim();
+
+    const tujuan =
+        document.getElementById("tujuan").value.trim();
+
+    const kapasitas =
+        document.getElementById("kapasitas").value;
+
+    if (!namaBus || !jam || !titikKumpul || !tujuan || !kapasitas) {
+
+        alert("Semua data bus harus diisi.");
+
+        return;
+    }
+
+    const { error } =
+        await supabaseClient
+            .from("bus")
+            .insert({
+                nama_bus: namaBus,
+                jam: jam,
+                titik_kumpul: titikKumpul,
+                tujuan: tujuan,
+                kapasitas: Number(kapasitas)
+            });
+
+    if (error) {
+
+        console.log(error);
+
+        alert("Gagal menyimpan data bus.");
+
+        return;
+    }
+
+    alert("Bus berhasil ditambahkan.");
+
+    window.location.href = "bus-admin.html";
+}
+
+</script>
+</body>
+</html>
