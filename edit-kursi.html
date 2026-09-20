@@ -265,7 +265,24 @@ async function loadKursi() {
             <div>
                 NIK: ${peserta.nik}
             </div>
+<label style="margin-top:20px;">
+    🚌 Bus
+</label>
 
+<select
+    id="bus"
+    style="
+        width:100%;
+        padding:13px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        font-size:16px;
+    "
+>
+    <option value="">
+        Pilih Bus
+    </option>
+</select>
             ${isiForm || `
                 <p>
                     Belum ada anggota keluarga.
@@ -280,10 +297,44 @@ async function loadKursi() {
 
         </div>
 
-    `;
+      `;
+
+    await loadDaftarBus();
+
 }
 
+async function loadDaftarBus() {
 
+    const { data, error } =
+        await supabaseClient
+            .from("bus")
+            .select("id, nama_bus")
+            .order("created_at", { ascending: true });
+
+    if (error) {
+        console.log(error);
+        return;
+    }
+
+    const pilihanBus =
+        document.getElementById("bus");
+
+    if (!pilihanBus) {
+        return;
+    }
+
+    data.forEach(function(bus) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = bus.nama_bus;
+        option.textContent = bus.nama_bus;
+
+        pilihanBus.appendChild(option);
+
+    });
+}
 async function simpanKursi() {
     
     const aman = await cekAdmin();
@@ -352,7 +403,7 @@ async function simpanKursi() {
 
 
 loadKursi();
-
+    
 </script>
 
 </body>
