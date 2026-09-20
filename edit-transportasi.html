@@ -309,7 +309,27 @@ option.dataset.tujuan = bus.tujuan || "";
         }
 
         pilihanBus.appendChild(option);
+pilihanBus.addEventListener("change", function() {
 
+    const busDipilih =
+        data.find(function(bus) {
+            return bus.nama_bus === pilihanBus.value;
+        });
+
+    if (!busDipilih) {
+        return;
+    }
+
+    document.getElementById("jam").value =
+        busDipilih.jam || "";
+
+    document.getElementById("titikKumpul").value =
+        busDipilih.titik_kumpul || "";
+
+    document.getElementById("tujuan").value =
+        busDipilih.tujuan || "";
+
+});
     });
 }
 async function simpanTransportasi() {
