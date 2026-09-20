@@ -302,6 +302,21 @@ async function loadDaftarBus(busTerpilih) {
 option.dataset.titikKumpul = bus.titik_kumpul || "";
 option.dataset.tujuan = bus.tujuan || "";
 
+        option.dataset.tujuan = bus.tujuan || "";
+
+option.addEventListener("click", function() {
+
+    document.getElementById("jam").value =
+        this.dataset.jam;
+
+    document.getElementById("titikKumpul").value =
+        this.dataset.titikKumpul;
+
+    document.getElementById("tujuan").value =
+        this.dataset.tujuan;
+
+});
+
         if (bus.nama_bus === busTerpilih) {
             option.selected = true;
         }
