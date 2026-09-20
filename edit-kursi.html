@@ -287,11 +287,11 @@ async function loadKursi() {
   
       `;  
   
-    await loadDaftarBus();  
+    await loadDaftarBus(busTerpilih);  
   
 }  
   
-async function loadDaftarBus() {  
+async function loadDaftarBus(busTerpilih) {  
   
     const { data, error } =  
         await supabaseClient  
