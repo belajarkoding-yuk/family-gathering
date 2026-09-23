@@ -321,7 +321,9 @@ async function loadDaftarBus(busTerpilih) {
   
         option.value = bus.nama_bus;  
         option.textContent = bus.nama_bus;  
-  
+  if (bus.nama_bus === busTerpilih) {
+    option.selected = true;
+  }
         pilihanBus.appendChild(option);  
   
     });  
