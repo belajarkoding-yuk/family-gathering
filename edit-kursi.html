@@ -287,6 +287,9 @@ async function loadKursi() {
   
       `;  
   
+        const busTerpilih =
+        peserta.transportasi?.bus || "";
+
     await loadDaftarBus(busTerpilih);  
   
 }  
@@ -370,13 +373,19 @@ async function simpanKursi() {
           
     });  
       
-    const { error: errorSimpan } =  
-    await supabaseClient  
-        .rpc("edit_kursi_admin", {  
-            p_nik: nik,  
-            p_keluarga: keluarga,  
+    const pilihanBus =
+    document.getElementById("bus");
+
+const bus =
+    pilihanBus.options[pilihanBus.selectedIndex].text;
+
+const { error: errorSimpan } =
+await supabaseClient
+    .rpc("edit_kursi_admin", {
+        p_nik: nik,
+        p_keluarga: keluarga,
         p_bus: bus
-        });  
+    });
       
     if (errorSimpan) {  
         console.log(errorSimpan);  
