@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Denah Kursi Bus</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f3;
+            color: #183b2a;
+        }
+
+        .app {
+            max-width: 430px;
+            min-height: 100vh;
+            margin: auto;
+            background: white;
+            padding: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            background: #174d35;
+            color: white;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .back {
+            background: #777;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .info {
+            background: #edf7f0;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bus {
+            background: #eeeeee;
+            border-radius: 25px;
+            padding: 20px 12px;
+        }
+
+        .depan {
+            text-align: center;
+            font-weight: bold;
+            background: #174d35;
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .baris {
+            display: grid;
+            grid-template-columns: 1fr 28px 1fr;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .kursi {
+            min-height: 65px;
+            background: white;
+            border: 2px solid #174d35;
+            border-radius: 12px;
+            padding: 7px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .nomor {
+            font-size: 13px;
+            font-weight: bold;
+            color: #174d35;
+        }
+
+        .nama {
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .kosong {
+            color: #999;
+            border-color: #bbb;
+        }
+
+        .lorong {
+            display: block;
+        }
+
+        .status {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <button
+        class="btn back"
+        onclick="window.location.href='bus-admin.html'">
+        ← KEMBALI
+    </button>
+
+    <h1>🪑 Denah Kursi</h1>
+
+    <div id="info" class="info">
+        Memuat data bus...
+    </div>
+
+    <div id="status" class="status">
+        Memuat denah kursi...
+    </div>
+
+    <div id="denah" class="bus"></div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+async function cekAdmin() {
+
+    const {
+        data: { session }
+    } =
+        await supabaseClient.auth.getSession();
+
+    if (!session) {
+
+        window.location.href =
+            "admin.html";
+
+        return false;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .from("admin_users")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .eq("role", "admin")
+            .maybeSingle();
+
+    if (error || !data) {
+
+        alert("Akses hanya untuk admin.");
+
+        window.location.href =
+            "index.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+async function loadDenah() {
+
+    const aman =
+        await cekAdmin();
+
+    if (!aman) {
+        return;
+    }
+
+    const parameter =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const busId =
+        parameter.get("id");
+
+    if (!busId) {
+
+        document.getElementById("status")
+            .innerText =
+            "ID bus tidak ditemukan.";
+
+        return;
+    }
+
+
+    // Ambil data bus
+    const { data: bus, error: errorBus } =
+        await supabaseClient
+            .from("bus")
+            .select("*")
+            .eq("id", busId)
+            .maybeSingle();
+
+    if (errorBus || !bus) {
+
+        console.log(errorBus);
+
+        document.getElementById("status")
+            .innerText =
+            "Data bus tidak ditemukan.";
+
+        return;
+    }
+
+
+    document.getElementById("info").innerHTML = `
+        <strong>🚍 ${bus.nama_bus}</strong><br><br>
+        🕐 Jam: ${bus.jam || "-"}<br>
+        📍 Titik kumpul: ${bus.titik_kumpul || "-"}<br>
+        🎯 Tujuan: ${bus.tujuan || "-"}<br>
+        💺 Kapasitas: ${bus.kapasitas || 0} kursi
+    `;
+
+
+    // Ambil semua peserta
+    const { data: peserta, error: errorPeserta } =
+        await supabaseClient
+            .rpc("ambil_semua_peserta_admin");
+
+    if (errorPeserta) {
+
+        console.log(errorPeserta);
+
+        document.getElementById("status")
+            .innerText =
+            "Gagal mengambil data peserta.";
+
+        return;
+    }
+
+
+    // Peserta yang menggunakan bus ini
+    const pesertaBus =
+        (peserta || []).filter(function(p) {
+
+            return p.transportasi &&
+                p.transportasi.bus === bus.nama_bus;
+
+        });
+
+
+    // Data kursi
+    const kursi = {};
+
+
+    pesertaBus.forEach(function(p) {
+
+        const keluarga =
+            Array.isArray(p.keluarga)
+                ? p.keluarga
+                : [];
+
+        keluarga.forEach(function(anggota) {
+
+            const nomor =
+                anggota.nomorKursi ||
+                anggota.kursi;
+
+            if (!nomor) {
+                return;
+            }
+
+            kursi[String(nomor)] =
+                anggota.nama || "Tanpa nama";
+
+        });
+
+    });
+
+
+    document.getElementById("status")
+        .style.display = "none";
+
+
+    const denah =
+        document.getElementById("denah");
+
+    denah.innerHTML = `
+        <div class="depan">
+            🚌 DEPAN BUS
+        </div>
+    `;
+
+
+    // Buat kursi 1 sampai kapasitas
+    const kapasitas =
+        Number(bus.kapasitas) || 40;
+
+
+    for (
+        let nomor = 1;
+        nomor <= kapasitas;
+        nomor += 4
+    ) {
+
+        const baris =
+            document.createElement("div");
+
+        baris.className =
+            "baris";
+
+
+        for (let posisi = 0; posisi < 4; posisi++) {
+
+            const nomorKursi =
+                nomor + posisi;
+
+            const kursiDiv =
+                document.createElement("div");
+
+            if (posisi === 2) {
+
+                const lorong =
+                    document.createElement("div");
+
+                lorong.className =
+                    "lorong";
+
+                baris.appendChild(lorong);
+            }
+
+
+            const nama =
+                kursi[String(nomorKursi)];
+
+
+            if (nama) {
+
+                kursiDiv.innerHTML = `
+                    <div class="nomor">
+                        Kursi ${nomorKursi}
+                    </div>
+
+                    <div class="nama">
+                        ${nama}
+                    </div>
+                `;
+
+            } else {
+
+                kursiDiv.className =
+                    "kursi kosong";
+
+                kursiDiv.innerHTML = `
+                    <div class="nomor">
+                        Kursi ${nomorKursi}
+                    </div>
+
+                    <div class="nama">
+                        Kosong
+                    </div>
+                `;
+            }
+
+
+            baris.appendChild(kursiDiv);
+
+        }
+
+
+        denah.appendChild(baris);
+
+    }
+
+}
+
+loadDenah();
+
+</script>
+
+</body>
+</html>
