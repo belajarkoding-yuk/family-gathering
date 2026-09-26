@@ -262,13 +262,21 @@ async function loadDenah() {
 
     // Peserta yang menggunakan bus ini
     const pesertaBus =
-        (peserta || []).filter(function(p) {
+    (peserta || []).filter(function(p) {
 
-            return p.transportasi &&
-                p.transportasi.bus === bus.nama_bus;
+        if (!p.transportasi || !p.transportasi.bus) {
+            return false;
+        }
 
-        });
+        const busPeserta =
+            String(p.transportasi.bus).trim();
 
+        const busDenah =
+            String(bus.nama_bus).trim();
+
+        return busPeserta === busDenah;
+
+    });
 
     // Data kursi
     const kursi = {};
