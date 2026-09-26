@@ -274,34 +274,41 @@ async function loadDenah() {
     const kursi = {};
 
 
-    pesertaBus.forEach(function(p) {
+pesertaBus.forEach(function(p) {
 
-        const keluarga =
-            Array.isArray(p.keluarga)
-                ? p.keluarga
-                : [];
+    const keluarga =
+        Array.isArray(p.keluarga)
+            ? p.keluarga
+            : [];
 
-        keluarga.forEach(function(anggota) {
+    keluarga.forEach(function(anggota) {
 
-            const nomor =
-                anggota.nomorKursi ||
-                anggota.kursi;
+        const nomor =
+            anggota.nomorKursi ||
+            anggota.kursi;
 
-            if (!nomor) {
-                return;
-            }
+        if (!nomor) {
+            return;
+        }
 
-            kursi[String(nomor)] =
-                anggota.nama || "Tanpa nama";
+        const nomorKursi =
+            String(nomor).trim();
 
-        });
+        if (!kursi[nomorKursi]) {
+            kursi[nomorKursi] = [];
+        }
+
+        kursi[nomorKursi].push(
+            anggota.nama || "Tanpa nama"
+        );
 
     });
 
+});
 
-    document.getElementById("status")
-        .style.display = "none";
 
+document.getElementById("status")
+    .style.display = "none";
 
     const denah =
         document.getElementById("denah");
